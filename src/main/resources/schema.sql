@@ -2,6 +2,7 @@ create table if not exists youtube_videos
 (
     video_id       text      not null unique,
     title          text      not null,
+    channel_id     text      not null,
     description    text      not null,
     published_at   timestamp not null,
     thumbnail_url  text      not null,
@@ -13,6 +14,9 @@ create table if not exists youtube_videos
     comment_count  int,
     fresh          bool
 );
+
+
+
 
 create table if not exists promoted_youtube_videos
 (

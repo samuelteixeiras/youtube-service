@@ -5,6 +5,7 @@ import com.joshlong.twitter.Twitter;
 import cs.youtube.utils.UrlUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,12 @@ import java.util.concurrent.TimeUnit;
 class EventListenerConfiguration {
 
 	private final int leaseInSeconds = 60 * 60 * 1;
+
+	@Value("youtube.callBackUrl")
+	private String callbackUrl;
+
+	@Value("youtube.channel-id")
+	private String channelId;
 
 	private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
@@ -66,14 +73,20 @@ class EventListenerConfiguration {
 		this.scheduledExecutorService.scheduleAtFixedRate(this::renew, 0, this.leaseInSeconds, TimeUnit.SECONDS);
 	}
 
+	@EventListener
+	void videoUpdated(String channelId) {
+
+	}
+
 	private void renew() {
-		subscribe(this.pubsubHubbubClient, this.leaseInSeconds);
+		subscribe(this.pubsubHubbubClient, this.leaseInSeconds, this.channelId, this.callbackUrl);
 		this.publisher.publishEvent(new YoutubeChannelUpdatedEvent(Instant.now()));
 	}
 
-	private static void subscribe(PubsubHubbubClient pubsubHubbubClient, int leaseInSeconds) {
-		var topicUrl = UrlUtils.url("https://www.youtube.com/xml/feeds/videos.xml?channel_id=UCjcceQmjS4DKBW_J_1UANow");
-		var callbackUrl = UrlUtils.url("https://api.coffeesoftware.com/reset");
+	private static void subscribe(PubsubHubbubClient pubsubHubbubClient, int leaseInSeconds, String channelId,
+			String callbackUrlStr) {
+		var topicUrl = UrlUtils.url("https://www.youtube.com/xml/feeds/videos.xml?channel_id=" + channelId);
+		var callbackUrl = UrlUtils.url(callbackUrlStr);
 		var unsubscribe = pubsubHubbubClient //
 				.unsubscribe(topicUrl, callbackUrl, PubsubHubbubClient.Verify.SYNC, leaseInSeconds, null)
 				.onErrorComplete();// don't caer if this fails

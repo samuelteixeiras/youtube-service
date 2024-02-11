@@ -19,9 +19,7 @@ import java.util.concurrent.Executors;
 @Controller
 @ResponseBody
 @RequiredArgsConstructor
-@CrossOrigin(origins = { "http://192.168.4.218:8081", "http://localhost:8081", "https://coffee-software-show.github.io",
-		"http://www.coffeesoftware.com", "https://www.coffeesoftware.com", "http://coffeesoftware.com",
-		"https://coffeesoftware.com" })
+@CrossOrigin(origins = { "http://192.168.4.218:8081", "http://localhost:8081" })
 class VideosController {
 
 	private final Executor executor = Executors.newSingleThreadExecutor();
@@ -41,6 +39,7 @@ class VideosController {
 		}
 		payload.getHeaders().forEach((k, v) -> log.info('\t' + k + '=' + String.join(",", v)));
 		log.info("payload: " + payload.getBody());
+
 		this.executor.execute(() -> publisher.publishEvent(new YoutubeChannelUpdatedEvent(Instant.now())));
 		return ResponseEntity.status(204).build();
 	}
