@@ -33,7 +33,7 @@ class VideosController {
 
     private final ApplicationEventPublisher publisher;
 
-    @RequestMapping(value = "/reset", method = {RequestMethod.GET, RequestMethod.POST})
+    @RequestMapping(value = "/update", method = {RequestMethod.GET, RequestMethod.POST})
     ResponseEntity<?> reset(RequestEntity<String> payload,
                             @RequestParam(value = "hub.challenge", required = false) String hubChallenge) {
         log.info("========================================");

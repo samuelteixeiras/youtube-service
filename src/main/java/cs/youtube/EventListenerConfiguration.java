@@ -2,6 +2,7 @@ package cs.youtube;
 
 import com.joshlong.google.pubsubhubbub.PubsubHubbubClient;
 import com.joshlong.twitter.Twitter;
+import cs.youtube.client.Channel;
 import cs.youtube.utils.UrlUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.r2dbc.core.DatabaseClient;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -66,7 +68,7 @@ class EventListenerConfiguration {
 
 	@EventListener(YoutubeChannelUpdatedEvent.class)
 	void youtubeChannelUpdated() {
-		this.service.refresh();
+		//this.service.refresh();
 	}
 
 	@EventListener(ApplicationReadyEvent.class)
@@ -77,7 +79,7 @@ class EventListenerConfiguration {
 	@EventListener(YoutubeChannelUpdatedEvent.class)
 	void videoUpdated(YoutubeChannelUpdatedEvent event) {
 		log.info("Video Updated: {}", event.videoId() + ':' + event.channelId());
-
+		this.service.insertVideoUpdate( event.videoId(), event.channelId());
 	}
 
 	@EventListener(YoutubeChannelCreatedEvent.class)
@@ -89,14 +91,16 @@ class EventListenerConfiguration {
 
 	private void renew() {
 		// we need to have a list of all channels to resub
-
-		subscribe(this.pubsubHubbubClient, this.leaseInSeconds, this.channelId, this.callbackUrl);
-		publisher.publishEvent(new YoutubeChannelCreatedEvent(Instant.now(), channelId));
+		List<Channel> allChannels = this.service.getAllChannels();
+		log.info("Subscribing to " + allChannels.size() + " channels");
+		allChannels.stream().forEach(channel -> {
+			subscribe(this.pubsubHubbubClient, this.leaseInSeconds, channel.channelId(), this.callbackUrl);
+			publisher.publishEvent(new YoutubeChannelCreatedEvent(Instant.now(), channelId));
+		});
 	}
 
 	private static void subscribe(PubsubHubbubClient pubsubHubbubClient, int leaseInSeconds, String channelId,
 			String callbackUrlStr) {
-		// insert
 		var topicUrl = UrlUtils.url("https://www.youtube.com/xml/feeds/videos.xml?channel_id=" + channelId);
 		var callbackUrl = UrlUtils.url(callbackUrlStr);
 		var unsubscribe = pubsubHubbubClient //

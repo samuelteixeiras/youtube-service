@@ -72,7 +72,7 @@ class DefaultYoutubeClient implements YoutubeClient {
 		var publishedAt = buildDateFrom(snippet.get("publishedAt").textValue());
 		var description = snippet.get("description").textValue();
 		var title = snippet.get("title").textValue();
-		var thumbnailUrl = new URL(snippet.get("thumbnails").get("default").get("url").textValue());
+		var thumbnailUrl = new URL(snippet.get("thumbnails").get("high").get("url").textValue());
 		var tags = jsonNodeOrNull(snippet, "tags");
 		var statistics = item.get("statistics");
 		var viewCount = JsonFormattingUtils.numberOrZero(statistics, "viewCount");

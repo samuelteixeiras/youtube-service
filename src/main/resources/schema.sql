@@ -1,6 +1,6 @@
 create table if not exists youtube_videos
 (
-    video_id       text      not null unique,
+    video_id       text      not null,
     title          text      not null,
     channel_id     text      not null,
     description    text      not null,
@@ -11,8 +11,7 @@ create table if not exists youtube_videos
     view_count     int,
     like_count     int,
     favorite_count int,
-    comment_count  int,
-    fresh          bool
+    comment_count  int
 );
 
 

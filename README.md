@@ -11,4 +11,11 @@
 
 
 ngrok http http://localhost:8080
+--
 
+- Adding a channel:
+```shell
+curl --location 'localhost:8080/channel/register' \
+--header 'Content-Type: application/json' \
+--data '{"channelId": "UCZvWcqKK7xRUgy5avHkFYSw"}'
+```
