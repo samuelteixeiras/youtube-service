@@ -56,6 +56,12 @@ class DefaultYoutubeService implements YoububeService {
             VALUES
                          (:channel_id , :enabled , :timestampUpdate);
             """;
+private final String selectLastVideosByChannel = """
+        SELECT * FROM youtube_videos
+        WHERE channel_id = :channel_id 
+        ORDER BY  published_at DESC
+        LIMIT :limit
+        """;
 
     private final String youtubeVideosUpsertSql = """
             insert into youtube_videos (
@@ -109,6 +115,26 @@ class DefaultYoutubeService implements YoububeService {
         var mapChannelFunction = (Function<Map<String, Object>, Channel>) row -> new Channel(
                 readColumn(row, "channel_id"), null, null, null);
         return this.databaseClient.sql(allChannelsQuerySql).fetch().all().map(mapChannelFunction).toStream()
+                .collect(Collectors.toList());
+    }
+    @Override
+    public List<Video> getLastVideosByChannels(String channelId, int limit) {
+        var mapVideoFunction = (Function<Map<String, Object>, Video>) row -> new Video(readColumn(row, "video_id"), //
+                readColumn(row, "title"), //
+                readColumn(row, "description"), //
+                buildDateFromLocalDateTime(readColumn(row, "published_at")), //
+                buildUrlFromString(readColumn(row, "thumbnail_url")), //
+                buildListFromArray(readColumn(row, "tags")), //
+                readColumn(row, "category_id"), //
+                readColumn(row, "view_count"), //
+                readColumn(row, "like_count"), //
+                readColumn(row, "favorite_count"), //
+                readColumn(row, "comment_count"), //
+                channelId);
+        return this.databaseClient.sql(selectLastVideosByChannel)
+                .bind("channel_id", channelId)
+                .bind("limit", limit)
+                .fetch().all().map(mapVideoFunction).toStream()
                 .collect(Collectors.toList());
     }
 

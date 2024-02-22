@@ -2,23 +2,15 @@ package cs.youtube;
 
 import com.joshlong.google.pubsubhubbub.PubsubHubbubClient;
 import cs.youtube.client.ChannelSubscribe;
-import cs.youtube.client.Video;
 import cs.youtube.utils.UrlUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.Instant;
-import java.util.Collection;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 @Slf4j
 @Controller
@@ -40,7 +32,7 @@ class ChannelsController {
     private final int leaseInSeconds = 60 * 60 * 1;
 
     @PostMapping(value = "/register" , consumes = {"application/json"})
-    public ResponseEntity<String> addArticle(@RequestBody ChannelSubscribe channelSubscribe) {
+    public ResponseEntity<String> addChannel(@RequestBody ChannelSubscribe channelSubscribe) {
         if (!channelSubscribe.channelId().isEmpty()) {
             String channelId = channelSubscribe.channelId();
             this.service.insertIntoChannel(channelId);
