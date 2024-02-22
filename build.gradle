@@ -36,6 +36,9 @@ dependencies {
     implementation 'com.joshlong:google-pubsubhubbub-spring-boot-starter:0.0.3'
     // twitter promotion client
     implementation 'com.joshlong.twitter:twitter-gateway-client:0.0.3-SNAPSHOT'
+
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.11.1'
+
     // regular build
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -44,6 +47,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 	runtimeOnly 'org.postgresql:r2dbc-postgresql'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
 }

@@ -1,5 +1,6 @@
 package cs.youtube;
 
+import cs.youtube.client.Channel;
 import cs.youtube.client.Video;
 import cs.youtube.client.YoutubeClient;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,13 @@ class DefaultYoutubeService implements YoububeService {
 			        pyt.promoted_at is null;
 			""";
 
+	private final String allChannelsQuerySql = """
+			    select  cn.* from
+			         youtube_channels cn
+			     where
+			     	cn.enabled = true;
+			""";
+
 	private final String youtubeVideosUpsertSql = """
 			insert into youtube_videos (
 			    video_id     ,
@@ -52,7 +60,8 @@ class DefaultYoutubeService implements YoububeService {
 			    favorite_count,
 			    comment_count ,
 			    tags,
-			    fresh
+			    fresh,
+			    channel_id
 			)
 			values (
 			    :video_id     ,
@@ -66,7 +75,8 @@ class DefaultYoutubeService implements YoububeService {
 			    :favorite_count,
 			    :comment_count ,
 			    :tags,
-			    true
+			    true,
+			    :channel_id
 			)
 			on conflict (video_id) do update set
 			        title = excluded.title,
@@ -94,6 +104,13 @@ class DefaultYoutubeService implements YoububeService {
 	@Override
 	public List<Video> videos() {
 		return this.videos;
+	}
+
+	public List<Channel> getAllChannels() {
+		var mapChannelFunction = (Function<Map<String, Object>, Channel>) row -> new Channel(
+				readColumn(row, "channel_id"), null, null, null);
+		return this.databaseClient.sql(allChannelsQuerySql).fetch().all().map(mapChannelFunction).toStream()
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -127,6 +144,7 @@ class DefaultYoutubeService implements YoububeService {
 						.bind("like_count", video.likeCount())//
 						.bind("favorite_count", video.favoriteCount())//
 						.bind("comment_count", video.commentCount())//
+						.bind("channel_id", video.channelId()) //
 						.bind("tags", video.tags().toArray(new String[0]))//
 						.fetch()//
 						.rowsUpdated()//

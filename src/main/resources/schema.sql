@@ -23,3 +23,10 @@ create table if not exists promoted_youtube_videos
     video_id    text      not null unique,
     promoted_at timestamp null
 );
+
+create table if not exists youtube_channels
+(
+    channel_id    text      not null unique,
+    enabled bool,
+    created_at timestamp null
+);
