@@ -17,5 +17,5 @@ interface YoububeService {
 
 	void insertIntoChannel(String channelId);
 
-	List<Video> getLastVideosByChannels(String channelId, int limit)
+	List<Video> getLastVideosByChannels(String channelId, int limit);
 }
